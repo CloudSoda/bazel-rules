@@ -2,6 +2,17 @@ workspace(name = "com_github_masmovil_bazel_rules")
 
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 
+http_archive(
+    name = "aspect_bazel_lib",
+    sha256 = "79623d656aa23ad3fd4692ab99786c613cd36e49f5566469ed97bc9b4c655f03",
+    strip_prefix = "bazel-lib-1.23.3",
+    url = "https://github.com/aspect-build/bazel-lib/archive/refs/tags/v1.23.3.tar.gz",
+)
+
+load("@aspect_bazel_lib//lib:repositories.bzl", "aspect_bazel_lib_dependencies")
+
+aspect_bazel_lib_dependencies()
+
 # Download the rules_docker repository at release v0.9.0
 http_archive(
     name = "io_bazel_rules_docker",
