@@ -39,5 +39,4 @@ helm_lint_test = rule(
     toolchains = [
       "@com_github_masmovil_bazel_rules//toolchains/helm-3:toolchain_type",
     ],
-    executable = True,
 )
