@@ -5,6 +5,7 @@ load(
     "LayerInfo",
 )
 load("//helpers:helpers.bzl", "get_make_value_or_default", "write_sh")
+load("@aspect_bazel_lib//lib:stamping.bzl", "STAMP_ATTRS", "maybe_stamp")
 
 ChartInfo = provider(fields = [
     "chart",
@@ -23,18 +24,22 @@ def _helm_chart_impl(ctx):
     tmp_chart_manifest_path = ""
     tmp_working_dir = "_tmp"
     inputs = [] + ctx.files.srcs
-
     digest_path = ""
     image_tag = ""
     helm_chart_version = get_make_value_or_default(ctx, ctx.attr.helm_chart_version)
     app_version = get_make_value_or_default(ctx, ctx.attr.app_version or helm_chart_version)
     yq = ctx.toolchains["@com_github_masmovil_bazel_rules//toolchains/yq:toolchain_type"].yqinfo.tool.files.to_list()[0]
-    stamp_files = [ctx.info_file, ctx.version_file]
     helm_toolchain = ctx.toolchains["@com_github_masmovil_bazel_rules//toolchains/helm-3:toolchain_type"].helminfo
     helm = helm_toolchain.tool.files.to_list()[0]
     helm_cache_path = helm_toolchain.helm_xdg_cache_home
     helm_config_path = helm_toolchain.helm_xdg_config_home
     helm_data_path = helm_toolchain.helm_xdg_data_home
+    stamp = maybe_stamp(ctx)
+    if stamp:
+        stamp_files = [ctx.info_file, ctx.version_file]
+    else:
+        stamp_files = []
+
 
     # declare rule output
     targz = ctx.actions.declare_file(ctx.attr.package_name + ".tgz")
@@ -167,7 +172,7 @@ def _helm_chart_impl(ctx):
 
 helm_chart = rule(
     implementation = _helm_chart_impl,
-    attrs = {
+    attrs = dict({
         "srcs": attr.label_list(allow_files = True, mandatory = True),
         "image": attr.label(allow_single_file = True, mandatory = False),
         "image_tag": attr.string(mandatory = False),
@@ -180,7 +185,7 @@ helm_chart = rule(
         "_script_template": attr.label(allow_single_file = True, default = ":helm-chart-package.sh.tpl"),
         "chart_deps": attr.label_list(allow_files = True, mandatory = False),
         "additional_templates": attr.label_list(allow_files = True, mandatory = False),
-    },
+    },**STAMP_ATTRS),
     toolchains = [
         "@com_github_masmovil_bazel_rules//toolchains/yq:toolchain_type",
         "@com_github_masmovil_bazel_rules//toolchains/helm-3:toolchain_type",
