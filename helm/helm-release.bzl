@@ -6,6 +6,7 @@ load(
 )
 
 load("//helpers:helpers.bzl", "write_sh", "get_make_value_or_default")
+load("@aspect_bazel_lib//lib:stamping.bzl", "STAMP_ATTRS", "maybe_stamp")
 load("//k8s:k8s.bzl", "NamespaceDataInfo")
 
 def runfile(ctx, f):
@@ -42,7 +43,8 @@ def _helm_release_impl(ctx):
     create_namespace = ctx.attr.create_namespace
     wait = ctx.attr.wait
     wait_timeout = ctx.attr.wait_timeout
-    stamp_files = [ctx.info_file, ctx.version_file]
+    stamp = maybe_stamp(ctx)
+    stamp_files = [stamp.volatile_status_file, stamp.stable_status_file] if stamp else []
 
     values_yaml = ""
     for i, values_yaml_file in enumerate(ctx.files.values_yaml):
@@ -99,7 +101,7 @@ def _helm_release_impl(ctx):
 
 helm_release = rule(
     implementation = _helm_release_impl,
-    attrs = {
+    attrs = dict({
       "chart": attr.label(allow_single_file = True, mandatory = True),
       "force": attr.string(mandatory = False, default = ""),  # could actually be a boolean
       "namespace_dep": attr.label(mandatory = False),
@@ -115,7 +117,7 @@ helm_release = rule(
       "wait": attr.string(mandatory = False, default = ""),  # could actually be a boolean
       "wait_timeout": attr.string(mandatory = False, default = ""),
       "_script_template": attr.label(allow_single_file = True, default = ":helm-release.sh.tpl"),
-    },
+    }, **STAMP_ATTRS),
     doc = "Installs or upgrades a new helm release",
     toolchains = [
         "@com_github_masmovil_bazel_rules//toolchains/helm:toolchain_type",
