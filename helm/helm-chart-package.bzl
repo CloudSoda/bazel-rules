@@ -34,12 +34,9 @@ def _helm_chart_impl(ctx):
     helm_cache_path = helm_toolchain.helm_xdg_cache_home
     helm_config_path = helm_toolchain.helm_xdg_config_home
     helm_data_path = helm_toolchain.helm_xdg_data_home
-    stamp = maybe_stamp(ctx)
-    if stamp:
-        stamp_files = [ctx.info_file, ctx.version_file]
-    else:
-        stamp_files = []
 
+    stamp = maybe_stamp(ctx)
+    stamp_files = [stamp.volatile_status_file, stamp.stable_status_file] if stamp else []
 
     # declare rule output
     targz = ctx.actions.declare_file(ctx.attr.package_name + ".tgz")
@@ -185,7 +182,7 @@ helm_chart = rule(
         "_script_template": attr.label(allow_single_file = True, default = ":helm-chart-package.sh.tpl"),
         "chart_deps": attr.label_list(allow_files = True, mandatory = False),
         "additional_templates": attr.label_list(allow_files = True, mandatory = False),
-    },**STAMP_ATTRS),
+    }, **STAMP_ATTRS),
     toolchains = [
         "@com_github_masmovil_bazel_rules//toolchains/yq:toolchain_type",
         "@com_github_masmovil_bazel_rules//toolchains/helm-3:toolchain_type",
