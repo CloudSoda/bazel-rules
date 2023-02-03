@@ -139,7 +139,6 @@ def _helm_chart_impl(ctx):
             "{HELM_CACHE_PATH}": helm_cache_path,
             "{HELM_CONFIG_PATH}": helm_config_path,
             "{HELM_DATA_PATH}": helm_data_path,
-            "{STAMP_FILE}": ctx.version_file.root.path,
             "{VALUES_REPO_YAML_PATH}": ctx.attr.values_repo_yaml_path,
             "{VALUES_TAG_YAML_PATH}": ctx.attr.values_tag_yaml_path,
             "%{stamp_statements}": "\n".join([

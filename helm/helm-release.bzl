@@ -89,9 +89,7 @@ def _helm_release_impl(ctx):
     runfiles = ctx.runfiles(
         files = [
             chart,
-            ctx.info_file,
-            ctx.version_file
-        ] + ctx.files.values_yaml + ctx.files.secrets_yaml + ctx.files.sops_yaml + helm_binary + helm3_binary + kubectl_binary
+        ] + stamp_files + ctx.files.values_yaml + ctx.files.secrets_yaml + ctx.files.sops_yaml + helm_binary + helm3_binary + kubectl_binary
     )
 
     return [DefaultInfo(

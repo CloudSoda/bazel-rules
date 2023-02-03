@@ -44,7 +44,7 @@ def _gcs_upload_impl(ctx):
 
 
     runfiles = ctx.runfiles(
-        files = [ctx.info_file, ctx.version_file, src_file]
+        files = stamp_files + [src_file]
     )
 
     return [DefaultInfo(

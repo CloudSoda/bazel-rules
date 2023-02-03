@@ -66,7 +66,7 @@ def _k8s_namespace_impl(ctx):
     )
 
     runfiles = ctx.runfiles(
-        files = [ctx.info_file, ctx.version_file]
+        files = stamp_files
     )
 
     return [DefaultInfo(
